@@ -28,10 +28,12 @@ export const API_CONFIG = {
 
 export const ROUTES = {
   // 공개 라우트 (인증 불필요)
-  PUBLIC: ['/auth/login', '/auth/signup', '/'],
+  PUBLIC: ['/auth/login', '/auth/signup', '/', '/questions'],
 
   // 보호된 라우트 (인증 필요)
-  PROTECTED: ['/questions', '/pointshop'],
+  // ⭐ 질문 작성(/ask-question), 질문 수정(/questions/*/edit), 포인트샵
+  // ⭐ 질문 목록(/questions), 질문 상세(/questions/[id])는 공개
+  PROTECTED: ['/ask-question', '/pointshop'],
 
   // 로그인 페이지
   LOGIN: '/auth/login',

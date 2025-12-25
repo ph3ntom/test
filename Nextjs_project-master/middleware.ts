@@ -14,16 +14,30 @@ export function middleware(request: NextRequest) {
   // 인증 관련 페이지 여부
   const isAuthPage = pathname.startsWith('/auth');
 
-  // 보호된 라우트 여부
-  const isProtectedRoute = ROUTES.PROTECTED.some((route) =>
+  // ⭐ 질문 수정 페이지 체크 (/questions/[id]/edit)
+  const isQuestionEditPage = /^\/questions\/[^/]+\/edit/.test(pathname);
+
+  // ⭐ 보호된 라우트 여부 체크
+  let isProtectedRoute = ROUTES.PROTECTED.some((route) =>
     pathname.startsWith(route),
   );
 
-  // ⭐ 보호된 라우트인데 세션 없음 → 로그인 페이지로
+  // ⭐ 질문 수정 페이지는 무조건 보호됨
+  if (isQuestionEditPage) {
+    isProtectedRoute = true;
+  }
+
+  // ⭐ 보호된 라우트인데 세션 없음 → 로그인 페이지로 리다이렉트
   if (isProtectedRoute && !hasSession) {
+    console.log(`🚫 Unauthorized access attempt to: ${pathname} - Redirecting to login`);
     const loginUrl = new URL(ROUTES.LOGIN, request.url);
     loginUrl.searchParams.set('returnUrl', pathname);
     return NextResponse.redirect(loginUrl);
+  }
+
+  // ⭐ 세션이 있는 경우 접근 허용
+  if (isProtectedRoute && hasSession) {
+    console.log(`✅ Authorized access to protected route: ${pathname}`);
   }
 
   // ⭐ 회원가입 페이지는 세션 있어도 접근 가능 (로그인 페이지도 접근 허용)
