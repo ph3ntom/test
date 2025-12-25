@@ -2,59 +2,75 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from "react"
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from "next/link"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent } from "@/components/ui/card"
+import { Alert, AlertDescription } from "@/components/ui/alert"
 import { Eye, EyeOff, ExternalLink } from "lucide-react"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/contexts/auth-context"
+import { apiClient } from "@/lib/api-client"
+import { STORAGE_KEYS } from "@/lib/constants"
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [userId, setUserId] = useState("")
   const [password, setPassword] = useState("")
+  const [error, setError] = useState("")
+  const [sessionExpired, setSessionExpired] = useState(false)
+  const [mounted, setMounted] = useState(false)
   const { theme } = useTheme()
   const { login } = useAuth()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  // ⭐ Hydration 오류 방지
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  // ⭐ 세션 만료 메시지 표시
+  useEffect(() => {
+    if (searchParams.get('session') === 'expired') {
+      setSessionExpired(true)
+      setError('세션이 만료되었습니다. 다시 로그인해주세요.')
+    }
+  }, [searchParams])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    
+    setError('')
+
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/login/loginProcess`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId, password }),
-      });
-  
-      if (!response.ok) {
-        throw new Error(`HTTP error! status: ${response.status}`);
-      }
-  
-      const data = await response.json();
-      console.log(data);
-      
-      if (data.code === "0000" && data.userId && data.sessionId && data.mbrId) {
+      const response = await apiClient.login(userId, password)
+
+      if (response.code === "0000") {
+        // Auth Context에 사용자 정보 저장
         login({
-          userId: data.userId,
-          sessionId: data.sessionId,
-          mbrId: data.mbrId,
-          points: data.point || 0
-        });
-        router.push('/'); // 메인 페이지로 리디렉션
-        alert(data.message);
+          userId: response.userId,
+          sessionId: response.sessionId,
+          mbrId: response.mbrId,
+          points: response.point || 0
+        })
+
+        // ⭐ returnUrl로 리다이렉트
+        const returnUrl = searchParams.get('returnUrl') ||
+                         localStorage.getItem(STORAGE_KEYS.RETURN_URL) ||
+                         '/'
+
+        localStorage.removeItem(STORAGE_KEYS.RETURN_URL)
+        router.push(returnUrl)
       } else {
-        alert(data.message || "로그인에 실패했습니다.");
+        setError(response.message || "로그인에 실패했습니다.")
       }
-  
-    } catch (error) {
-      console.error("Login error:", error);
+
+    } catch (err) {
+      setError("로그인 중 오류가 발생했습니다.")
+      console.error("Login error:", err)
     }
   }
 
@@ -64,7 +80,9 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           <div className="flex justify-center mb-8">
             <Link href="/">
-              {theme === "dark" ? (
+              {!mounted ? (
+                <Image src="/logo-light.svg" alt="DevForum Logo" width={50} height={50} className="h-12 w-12" />
+              ) : theme === "dark" ? (
                 <Image src="/logo-dark.svg" alt="DevForum Logo" width={50} height={50} className="h-12 w-12" />
               ) : (
                 <Image src="/logo-light.svg" alt="DevForum Logo" width={50} height={50} className="h-12 w-12" />
@@ -73,6 +91,13 @@ export default function LoginPage() {
           </div>
 
           <h1 className="text-2xl font-bold text-center mb-6">로그인</h1>
+
+          {/* ⭐ 세션 만료 또는 에러 메시지 */}
+          {error && (
+            <Alert variant={sessionExpired ? "destructive" : "default"} className="mb-4">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
 
           <Card className="shadow-lg">
             <CardContent className="pt-6">
