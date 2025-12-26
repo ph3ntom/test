@@ -12,6 +12,7 @@ import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import type { Question, Answer } from "@/types"
 import { useAuth } from "@/contexts/auth-context"
+import { sanitizeHtml } from "@/lib/sanitize"
 
 interface QuestionPageProps {
   params: Promise<{
@@ -32,7 +33,9 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     const fetchQuestionAndAnswers = async () => {
       try {
         // Question 데이터 가져오기
-        const questionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}`)
+        const questionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}`, {
+          credentials: 'include', // ⭐ 쿠키 포함
+        })
         if (!questionResponse.ok) {
           throw new Error('Failed to fetch question')
         }
@@ -40,7 +43,9 @@ export default function QuestionPage({ params }: QuestionPageProps) {
         setQuestion(questionData)
 
         // Question이 성공적으로 가져와지면 Answers도 가져오기
-        const answersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/answers`)
+        const answersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/answers`, {
+          credentials: 'include', // ⭐ 쿠키 포함
+        })
         if (!answersResponse.ok) {
           throw new Error('Failed to fetch answers')
         }
@@ -58,17 +63,13 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
   const handleDeleteAnswer = async (answerId: number) => {
     if (!confirm('정말 이 답변을 삭제하시겠습니까?')) return;
-    
+
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/answers/${answerId}/del`, 
+        `${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/answers/${answerId}/del`,
         {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            mbrId: user?.mbrId || 0,
-            targetAnswerId: answerId  // 취약점: 파라미터 조작 가능
-          })
+          credentials: 'include', // ⭐ 쿠키 포함 (세션 인증)
         }
       );
       
@@ -87,16 +88,11 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
   const handleDelete = async () => {
     if (!confirm('정말 이 질문을 삭제하시겠습니까?')) return;
-    
+
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/del`, {
         method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json' 
-        },
-        body: JSON.stringify({ 
-          mbrId: user?.mbrId || 0 
-        })
+        credentials: 'include', // ⭐ 쿠키 포함 (세션 인증)
       });
       
       if (response.ok) {
@@ -182,8 +178,8 @@ export default function QuestionPage({ params }: QuestionPageProps) {
         {/* Question content */}
         <div className="space-y-4">
           <div className="prose dark:prose-invert max-w-none">
-            <div dangerouslySetInnerHTML={{ __html: question.description }} />
-            {question.body && <div dangerouslySetInnerHTML={{ __html: question.body }} />}
+            <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.description) }} />
+            {question.body && <div dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.body) }} />}
           </div>
 
           <div className="flex flex-wrap gap-2 mt-4">

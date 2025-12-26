@@ -100,6 +100,7 @@ export default function PointShopContainer() {
       console.log('포인트 조회 시작:', user.mbrId)
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/points/${user.mbrId}`, {
         method: 'POST',
+        credentials: 'include', // ⭐ 쿠키 포함
         headers: { 'Content-Type': 'application/json' }
       })
       console.log('API 응답 상태:', response.status)
@@ -119,7 +120,9 @@ export default function PointShopContainer() {
     const fetchData = async () => {
       // 쿠폰 목록 가져오기
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons`, {
+          credentials: 'include', // ⭐ 쿠키 포함
+        })
         if (response.ok) {
           const couponData = await response.json()
           setCoupons(couponData)
@@ -139,20 +142,28 @@ export default function PointShopContainer() {
 
   const handleCouponUse = async () => {
     if (!selectedCoupon || isCharging) return
-    
+
     setIsCharging(true)
     try {
+      console.log('=== 쿠폰 사용 요청 (Frontend) ===')
+      console.log('쿠폰 코드:', selectedCoupon)
+      console.log('현재 쿠키:', document.cookie)
+      console.log('User 정보:', user)
+
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/use`, {
         method: 'POST',
+        credentials: 'include', // ⭐ 쿠키 포함 (세션에서 mbrId 추출)
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          couponCode: selectedCoupon,
-          mbrId: user?.mbrId || 0
+        body: JSON.stringify({
+          couponCode: selectedCoupon
         })
       })
-      
+
+      console.log('응답 상태:', response.status, response.statusText)
+
       if (response.ok) {
         const result = await response.json()
+        console.log('성공 응답:', result)
         // 포인트 정보 재조회
         await fetchUserPoints()
         // 사용된 쿠폰을 목록에서 제거 (프론트엔드에서만)
@@ -161,8 +172,16 @@ export default function PointShopContainer() {
         setIsDialogOpen(false)
         alert(result.message)
       } else {
-        const error = await response.json()
-        alert(error.message || '쿠폰 사용에 실패했습니다.')
+        // 에러 응답 처리
+        let errorMessage = '쿠폰 사용에 실패했습니다.'
+        try {
+          const error = await response.json()
+          console.log('에러 응답:', error)
+          errorMessage = error.message || errorMessage
+        } catch (e) {
+          console.error('에러 응답 파싱 실패:', e)
+        }
+        alert(errorMessage)
       }
     } catch (error) {
       console.error('쿠폰 사용 오류:', error)

@@ -82,8 +82,9 @@ export default function SignupPage() {
     try{
       console.log("Client - Fetching CheckId via API Route:", { userId: formData.userId });
 
-      const response = await fetch("/api/register/CheckId", { 
+      const response = await fetch("/api/register/CheckId", {
         method: "POST",
+        credentials: 'include', // ⭐ 쿠키 포함
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: formData.userId }),
       });

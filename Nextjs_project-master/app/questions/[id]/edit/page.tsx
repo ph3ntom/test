@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
 import type { QuestionFormData, QuestionPreview, Question } from "@/types"
+import { sanitizeHtml } from "@/lib/sanitize"
 
 interface EditQuestionPageProps {
   params: Promise<{
@@ -40,7 +41,9 @@ export default function EditQuestionPage({ params }: EditQuestionPageProps) {
   useEffect(() => {
     const fetchQuestion = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}`, {
+          credentials: 'include', // ⭐ 쿠키 포함
+        })
         if (!response.ok) {
           throw new Error('질문을 불러올 수 없습니다.')
         }
@@ -175,12 +178,13 @@ export default function EditQuestionPage({ params }: EditQuestionPageProps) {
     const tagsArray = tags.split(' ').filter(tag => tag.trim() !== '')
 
     try {
+      // HTML Sanitize 적용 (XSS 방지)
+      const sanitizedBody = sanitizeHtml(body)
+
       // FormData 사용 (파일 업로드 지원)
       const formData = new FormData()
       formData.append('title', title)
-      formData.append('description', body)
-      formData.append('mbrId', String(user?.mbrId || 0))
-      formData.append('targetQuestionId', id)
+      formData.append('description', sanitizedBody)
 
       // tags를 공백으로 구분된 문자열로 전송 (백엔드에서 파싱)
       if (tagsArray.length > 0) {
@@ -194,14 +198,13 @@ export default function EditQuestionPage({ params }: EditQuestionPageProps) {
       console.log('전송할 데이터:', {
         title,
         description: body,
-        mbrId: user?.mbrId || 0,
-        targetQuestionId: id,
         tags: tagsArray,
         hasFile: !!selectedFile
       })
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/edit`, {
         method: 'POST',
+        credentials: 'include', // ⭐ 쿠키 포함
         body: formData, // FormData는 Content-Type을 자동 설정
       })
 
@@ -238,7 +241,7 @@ export default function EditQuestionPage({ params }: EditQuestionPageProps) {
   const generatePreview = useCallback(() => {
     setPreview({
       title,
-      body,
+      body: sanitizeHtml(body),
       tags: tags.split(" ").filter((tag) => tag.trim() !== ""),
     })
   }, [title, body, tags])

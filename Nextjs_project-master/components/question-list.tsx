@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import UserInfo from "./user-info"
 import type { Question, Answer } from "@/types"
+import { sanitizeHtml } from "@/lib/sanitize"
 
 const QuestionList = memo(function QuestionList() {
   const [questions, setQuestions] = useState<Question[]>([])
@@ -16,13 +17,15 @@ const QuestionList = memo(function QuestionList() {
   const fetchAnswers = async (questionIds: number[]) => {
     try {
       const answerPromises = questionIds.map(async (questionId) => {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${questionId}/answers`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${questionId}/answers`, {
+          credentials: 'include', // ⭐ 쿠키 포함
+        })
         if (!response.ok) {
           throw new Error(`Failed to fetch answers for question ${questionId}`)
         }
         return response.json()
       })
-      
+
       const answersData = await Promise.all(answerPromises)
       const flattenedAnswers = answersData.flat()
       setAnswers(flattenedAnswers)
@@ -34,7 +37,9 @@ const QuestionList = memo(function QuestionList() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions`)
+        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions`, {
+          credentials: 'include', // ⭐ 쿠키 포함
+        })
         if (!response.ok) {
           throw new Error('Failed to fetch questions')
         }
@@ -81,7 +86,7 @@ const QuestionList = memo(function QuestionList() {
                 </Link>
                 <div
                   className="text-sm text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: question.description }}
+                  dangerouslySetInnerHTML={{ __html: sanitizeHtml(question.description) }}
                 />
                 <div className="flex items-center justify-between pt-2">
                   <div className="flex flex-wrap gap-2">

@@ -56,7 +56,9 @@ export default function UsersPage() {
 
   const fetchUsers = async () => {
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users`, {
+        credentials: 'include', // ⭐ 쿠키 포함
+      })
       if (response.ok) {
         const data = await response.json()
         setUsersData(data)
@@ -76,7 +78,9 @@ export default function UsersPage() {
 
     setSearching(true)
     try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/search?q=${encodeURIComponent(searchQuery)}`)
+      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/users/search?q=${encodeURIComponent(searchQuery)}`, {
+        credentials: 'include', // ⭐ 쿠키 포함
+      })
 
       if (response.ok) {
         const data = await response.json()

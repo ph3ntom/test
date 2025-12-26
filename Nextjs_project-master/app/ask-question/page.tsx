@@ -12,6 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Label } from "@/components/ui/label"
 import { useAuth } from "@/contexts/auth-context"
 import type { QuestionFormData, QuestionPreview } from "@/types"
+import { sanitizeHtml, sanitizeUrl } from "@/lib/sanitize"
 
 export default function AskQuestionPage() {
   const [title, setTitle] = useState("")
@@ -127,20 +128,12 @@ export default function AskQuestionPage() {
         newText = before + `<em>${selectedText || 'italic text'}</em>` + after
       } else if (tag === 'link') {
         const url = prompt('Enter URL:') || '#'
-        newText = before + `<a href="${url}">${selectedText || 'link text'}</a>` + after
+        const sanitizedUrl = sanitizeUrl(url)
+        newText = before + `<a href="${sanitizedUrl}">${selectedText || 'link text'}</a>` + after
       } else if (tag === 'img') {
         const src = prompt('Enter image URL:') || ''
-        newText = before + `<img src="${src}" alt="${selectedText || 'image'}" />` + after
-      } else if (tag === 'script') {
-        newText = before + `</div><script>${selectedText || 'alert("XSS test")'}</script><div>` + after
-      } else if (tag === 'xss-img') {
-        newText = before + `<img src="x" onmouseout="alert('XSS via img')" />` + after
-      } else if (tag === 'xss-svg') {
-        newText = before + `<svg onload="alert('XSS via SVG')" />` + after
-      } else if (tag === 'xss-details') {
-        newText = before + `<details open ontoggle="alert('XSS via details')">Click me</details>` + after
-      } else if (tag === 'xss-iframe') {
-        newText = before + `<iframe src="javascript:alert('XSS via iframe')"></iframe>` + after
+        const sanitizedSrc = sanitizeUrl(src)
+        newText = before + `<img src="${sanitizedSrc}" alt="${selectedText || 'image'}" />` + after
       } else {
         newText = body // 기본값으로 현재 body 사용
       }
@@ -174,10 +167,13 @@ export default function AskQuestionPage() {
     const tagsArray = tags.split(' ').filter(tag => tag.trim() !== '')
 
     try {
+      // HTML Sanitize 적용 (XSS 방지)
+      const sanitizedBody = sanitizeHtml(body)
+
       // FormData 사용 (파일 업로드 지원)
       const formData = new FormData()
       formData.append('title', title)
-      formData.append('description', body)
+      formData.append('description', sanitizedBody)
       formData.append('mbrId', String(user?.mbrId || 0))
 
       // tags를 공백으로 구분된 문자열로 전송 (백엔드에서 파싱)
@@ -199,6 +195,7 @@ export default function AskQuestionPage() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions`, {
         method: 'POST',
+        credentials: 'include', // ⭐ 쿠키 포함
         body: formData, // FormData는 Content-Type을 자동 설정
       })
 
@@ -246,7 +243,7 @@ export default function AskQuestionPage() {
   const generatePreview = useCallback(() => {
     setPreview({
       title,
-      body,
+      body: sanitizeHtml(body),
       tags: tags.split(" ").filter((tag) => tag.trim() !== ""),
     })
   }, [title, body, tags])
