@@ -12,7 +12,7 @@ export async function POST(request: Request) {
 
     console.log("API Route - Calling backend CheckId with userId:", userId);
 
-    const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/register/CheckId`, {
+    const backendResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/register/CheckId`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ userId }),

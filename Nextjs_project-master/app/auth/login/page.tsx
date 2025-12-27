@@ -47,8 +47,11 @@ export default function LoginPage() {
 
     try {
       const response = await apiClient.login(userId, password)
+      console.log("Login response:", response)
 
       if (response.code === "0000") {
+        console.log("Login successful, response code is 0000")
+
         // Auth Context에 사용자 정보 저장
         login({
           userId: response.userId,
@@ -62,9 +65,12 @@ export default function LoginPage() {
                          localStorage.getItem(STORAGE_KEYS.RETURN_URL) ||
                          '/'
 
+        console.log("Redirecting to:", returnUrl)
         localStorage.removeItem(STORAGE_KEYS.RETURN_URL)
         router.push(returnUrl)
+        console.log("router.push called")
       } else {
+        console.log("Login failed, response code:", response.code)
         setError(response.message || "로그인에 실패했습니다.")
       }
 
