@@ -84,7 +84,7 @@ export default function SignupPage() {
 
       const response = await fetch("/api/check-id", {
         method: "POST",
-        credentials: 'include', // ⭐ 쿠키 포함
+        credentials: 'include', // 쿠키 포함
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ userId: formData.userId }),
       });

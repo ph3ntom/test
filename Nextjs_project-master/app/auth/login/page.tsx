@@ -28,12 +28,12 @@ export default function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  // ⭐ Hydration 오류 방지
+  // Hydration 오류 방지
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // ⭐ 세션 만료 메시지 표시
+  // 세션 만료 메시지 표시
   useEffect(() => {
     if (searchParams.get('session') === 'expired') {
       setSessionExpired(true)
@@ -60,7 +60,7 @@ export default function LoginPage() {
           points: response.point || 0
         })
 
-        // ⭐ returnUrl로 리다이렉트
+        // returnUrl로 리다이렉트
         const returnUrl = searchParams.get('returnUrl') ||
                          localStorage.getItem(STORAGE_KEYS.RETURN_URL) ||
                          '/'
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
           <h1 className="text-2xl font-bold text-center mb-6">로그인</h1>
 
-          {/* ⭐ 세션 만료 또는 에러 메시지 */}
+          {/* 세션 만료 또는 에러 메시지 */}
           {error && (
             <Alert variant={sessionExpired ? "destructive" : "default"} className="mb-4">
               <AlertDescription>{error}</AlertDescription>

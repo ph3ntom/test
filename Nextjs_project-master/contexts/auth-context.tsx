@@ -28,21 +28,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [lastActivity, setLastActivity] = useState(Date.now())
   const pathname = usePathname()
 
-  // ⭐ 세션 타임아웃 훅
+  // 세션 타임아웃 훅
   const { showWarning, setShowWarning } = useSessionTimeout({
     isLoggedIn: !!user,
     lastActivity,
     onLogout: logout,
   })
 
-  // ⭐ 활동 추적 훅
+  // 활동 추적 훅
   const updateActivity = useCallback(() => {
     const now = Date.now()
     setLastActivity(now)
     setShowWarning(false)
     localStorage.setItem(STORAGE_KEYS.LAST_ACTIVITY, now.toString())
 
-    // ⭐ 백엔드에 실제 활동 알림 (lastActivity 업데이트)
+    // 백엔드에 실제 활동 알림 (lastActivity 업데이트)
     if (user) {
       apiClient.updateActivity().catch(err => {
         console.error('Failed to update activity:', err)
@@ -55,7 +55,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     enabled: !!user,
   })
 
-  // ⭐ 페이지 접근 시 세션 검증
+  // 페이지 접근 시 세션 검증
   useEffect(() => {
     if (!user || !pathname) return
 
@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     validateOnPageAccess()
   }, [pathname, user])
 
-  // ⭐ 초기 로드 (localStorage)
+  // 초기 로드 (localStorage)
   useEffect(() => {
     const storedUser = localStorage.getItem(STORAGE_KEYS.USER)
     const storedActivity = localStorage.getItem(STORAGE_KEYS.LAST_ACTIVITY)
@@ -97,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     setIsHydrated(true)
   }, [])
 
-  // ⭐ 로그인
+  // 로그인
   const login = useCallback((userData: User) => {
     setUser(userData)
     setLastActivity(Date.now())
@@ -106,7 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     localStorage.setItem(STORAGE_KEYS.LAST_ACTIVITY, Date.now().toString())
   }, [])
 
-  // ⭐ 로그아웃
+  // 로그아웃
   async function logout() {
     try {
       await apiClient.logout()
@@ -120,7 +120,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }
 
-  // ⭐ 세션 연장
+  // 세션 연장
   const extendSession = useCallback(async () => {
     try {
       await apiClient.extendSession()
@@ -155,7 +155,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     >
       {children}
 
-      {/* ⭐ 세션 경고 모달 */}
+      {/* 세션 경고 모달 */}
       <SessionWarningModal
         open={showWarning}
         lastActivity={lastActivity}

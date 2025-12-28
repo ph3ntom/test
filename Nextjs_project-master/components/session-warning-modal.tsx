@@ -30,7 +30,7 @@ export function SessionWarningModal({
 }: SessionWarningModalProps) {
   const [remainingTime, setRemainingTime] = useState(0);
 
-  // ⭐ 남은 시간 계산
+  // 남은 시간 계산
   useEffect(() => {
     if (!open) return;
 

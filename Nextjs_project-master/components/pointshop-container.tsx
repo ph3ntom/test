@@ -100,7 +100,7 @@ export default function PointShopContainer() {
       console.log('포인트 조회 시작:', user.mbrId)
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/points/${user.mbrId}`, {
         method: 'POST',
-        credentials: 'include', // ⭐ 쿠키 포함
+        credentials: 'include', // 쿠키 포함
         headers: { 'Content-Type': 'application/json' }
       })
       console.log('API 응답 상태:', response.status)
@@ -121,7 +121,7 @@ export default function PointShopContainer() {
       // 쿠폰 목록 가져오기
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons`, {
-          credentials: 'include', // ⭐ 쿠키 포함
+          credentials: 'include', // 쿠키 포함
         })
         if (response.ok) {
           const couponData = await response.json()
@@ -152,7 +152,7 @@ export default function PointShopContainer() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/coupons/use`, {
         method: 'POST',
-        credentials: 'include', // ⭐ 쿠키 포함 (세션에서 mbrId 추출)
+        credentials: 'include', // 쿠키 포함 (세션에서 mbrId 추출)
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           couponCode: selectedCoupon

@@ -21,8 +21,8 @@ export const SESSION_CONFIG = {
 } as const;
 
 export const API_CONFIG = {
-  BASE_URL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api',
-  PREFIX: '', // ⭐ PREFIX는 이미 BASE_URL에 포함됨
+  BASE_URL: process.env.NEXT_PUBLIC_API_URL,
+  PREFIX: '', // PREFIX는 이미 BASE_URL에 포함됨
   TIMEOUT: 10000, // 10초
 } as const;
 
@@ -31,8 +31,8 @@ export const ROUTES = {
   PUBLIC: ['/auth/login', '/auth/signup', '/', '/questions'],
 
   // 보호된 라우트 (인증 필요)
-  // ⭐ 질문 작성(/ask-question), 질문 수정(/questions/*/edit), 포인트샵
-  // ⭐ 질문 목록(/questions), 질문 상세(/questions/[id])는 공개
+  // 질문 작성(/ask-question), 질문 수정(/questions/*/edit), 포인트샵
+  // 질문 목록(/questions), 질문 상세(/questions/[id])는 공개
   PROTECTED: ['/ask-question', '/pointshop'],
 
   // 로그인 페이지

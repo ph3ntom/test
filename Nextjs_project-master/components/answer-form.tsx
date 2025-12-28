@@ -44,7 +44,7 @@ export default function AnswerForm({ questionId }: AnswerFormProps) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${questionId}/answers`, {
         method: 'POST',
-        credentials: 'include', // ⭐ 쿠키 포함
+        credentials: 'include', // 쿠키 포함
         headers: {
           'Content-Type': 'application/json',
         },

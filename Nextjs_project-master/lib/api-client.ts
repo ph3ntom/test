@@ -15,7 +15,7 @@ class ApiClient {
     this.baseURL = API_CONFIG.BASE_URL + API_CONFIG.PREFIX;
   }
 
-  // ⭐ 핵심: Fetch 래퍼
+  // 핵심: Fetch 래퍼
   private async fetch<T>(
     endpoint: string,
     options: RequestInit = {},
@@ -24,7 +24,7 @@ class ApiClient {
 
     const config: RequestInit = {
       ...options,
-      credentials: 'include', // ⭐ 쿠키 포함 (필수!)
+      credentials: 'include', // 쿠키 포함 (필수!)
       headers: {
         'Content-Type': 'application/json',
         ...options.headers,
@@ -45,7 +45,7 @@ class ApiClient {
 
       clearTimeout(timeoutId);
 
-      // ⭐ 세션 만료 처리
+      // 세션 만료 처리
       if (response.status === 401) {
         this.handleSessionExpired();
         throw new Error('Session expired');
@@ -69,7 +69,7 @@ class ApiClient {
     }
   }
 
-  // ⭐ 세션 만료 처리
+  // 세션 만료 처리
   private handleSessionExpired(): void {
     // 현재 경로 저장 (로그인 후 복귀용)
     if (typeof window !== 'undefined') {
@@ -117,7 +117,7 @@ class ApiClient {
     });
   }
 
-  // ⭐ 활동 업데이트 (사용자 활동 시 호출)
+  // 활동 업데이트 (사용자 활동 시 호출)
   async updateActivity(): Promise<{ message: string }> {
     return this.fetch('/auth/session/activity', {
       method: 'POST',

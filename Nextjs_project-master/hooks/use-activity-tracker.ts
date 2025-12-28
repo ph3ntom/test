@@ -16,7 +16,7 @@ export function useActivityTracker({
 }: UseActivityTrackerOptions) {
   const timeoutRef = useRef<NodeJS.Timeout>();
 
-  // ⭐ Debounced 활동 핸들러
+  // Debounced 활동 핸들러
   const handleActivity = useCallback(() => {
     if (!enabled) return;
 
@@ -34,12 +34,12 @@ export function useActivityTracker({
   useEffect(() => {
     if (!enabled) return;
 
-    // ⭐ 이벤트 리스너 등록
+    // 이벤트 리스너 등록
     ACTIVITY_EVENTS.forEach((event) => {
       window.addEventListener(event, handleActivity, { passive: true });
     });
 
-    // ⭐ 클린업
+    // 클린업
     return () => {
       ACTIVITY_EVENTS.forEach((event) => {
         window.removeEventListener(event, handleActivity);

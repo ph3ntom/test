@@ -195,7 +195,7 @@ export default function AskQuestionPage() {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions`, {
         method: 'POST',
-        credentials: 'include', // ⭐ 쿠키 포함
+        credentials: 'include', // 쿠키 포함
         body: formData, // FormData는 Content-Type을 자동 설정
       })
 

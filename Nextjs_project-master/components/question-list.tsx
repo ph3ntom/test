@@ -18,7 +18,7 @@ const QuestionList = memo(function QuestionList() {
     try {
       const answerPromises = questionIds.map(async (questionId) => {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${questionId}/answers`, {
-          credentials: 'include', // ⭐ 쿠키 포함
+          credentials: 'include', // 쿠키 포함
         })
         if (!response.ok) {
           throw new Error(`Failed to fetch answers for question ${questionId}`)
@@ -38,7 +38,7 @@ const QuestionList = memo(function QuestionList() {
     const fetchQuestions = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions`, {
-          credentials: 'include', // ⭐ 쿠키 포함
+          credentials: 'include', // 쿠키 포함
         })
         if (!response.ok) {
           throw new Error('Failed to fetch questions')

@@ -42,7 +42,7 @@ export default function EditQuestionPage({ params }: EditQuestionPageProps) {
     const fetchQuestion = async () => {
       try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}`, {
-          credentials: 'include', // ⭐ 쿠키 포함
+          credentials: 'include', // 쿠키 포함
         })
         if (!response.ok) {
           throw new Error('질문을 불러올 수 없습니다.')
@@ -204,7 +204,7 @@ export default function EditQuestionPage({ params }: EditQuestionPageProps) {
 
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/edit`, {
         method: 'POST',
-        credentials: 'include', // ⭐ 쿠키 포함
+        credentials: 'include', // 쿠키 포함
         body: formData, // FormData는 Content-Type을 자동 설정
       })
 

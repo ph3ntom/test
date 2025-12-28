@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowUp, ArrowDown, Bookmark } from "lucide-react"
 import { formatDistanceToNow } from "date-fns"
 import AnswerForm from "@/components/answer-form"
-import CodeBlock from "@/components/code-block"
+// import CodeBlock from "@/components/code-block" // 미사용 import - 주석처리
 import { useState, useEffect, use } from "react"
 import { useRouter } from "next/navigation"
 import type { Question, Answer } from "@/types"
@@ -34,7 +34,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
       try {
         // Question 데이터 가져오기
         const questionResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}`, {
-          credentials: 'include', // ⭐ 쿠키 포함
+          credentials: 'include', // 쿠키 포함
         })
         if (!questionResponse.ok) {
           throw new Error('Failed to fetch question')
@@ -44,7 +44,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
 
         // Question이 성공적으로 가져와지면 Answers도 가져오기
         const answersResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/answers`, {
-          credentials: 'include', // ⭐ 쿠키 포함
+          credentials: 'include', // 쿠키 포함
         })
         if (!answersResponse.ok) {
           throw new Error('Failed to fetch answers')
@@ -69,7 +69,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
         `${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/answers/${answerId}/del`,
         {
           method: 'POST',
-          credentials: 'include', // ⭐ 쿠키 포함 (세션 인증)
+          credentials: 'include', // 쿠키 포함 (세션 인증)
         }
       );
       
@@ -92,7 +92,7 @@ export default function QuestionPage({ params }: QuestionPageProps) {
     try {
       const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/questions/${id}/del`, {
         method: 'POST',
-        credentials: 'include', // ⭐ 쿠키 포함 (세션 인증)
+        credentials: 'include', // 쿠키 포함 (세션 인증)
       });
       
       if (response.ok) {

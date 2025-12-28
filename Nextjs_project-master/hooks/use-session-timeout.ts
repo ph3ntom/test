@@ -18,7 +18,7 @@ export function useSessionTimeout({
   const [showWarning, setShowWarning] = useState(false);
   const [isValidating, setIsValidating] = useState(false);
 
-  // ⭐ 타임아웃 체크 (1분마다)
+  // 타임아웃 체크 (1분마다)
   useEffect(() => {
     if (!isLoggedIn) return;
 
@@ -43,7 +43,7 @@ export function useSessionTimeout({
     return () => clearInterval(interval);
   }, [isLoggedIn, lastActivity, onLogout]);
 
-  // ⭐ 주기적 세션 검증 (10분마다만, 페이지 접근 시에만)
+  // 주기적 세션 검증 (10분마다만, 페이지 접근 시에만)
   useEffect(() => {
     if (!isLoggedIn) return;
 
@@ -62,7 +62,7 @@ export function useSessionTimeout({
       }
     };
 
-    // ⭐ 10분마다 검증 (즉시 실행하지 않음)
+    // 10분마다 검증 (즉시 실행하지 않음)
     const interval = setInterval(
       validateSession,
       SESSION_CONFIG.VALIDATION_INTERVAL,

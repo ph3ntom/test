@@ -148,21 +148,22 @@ function escapeHtmlAttribute(text: string): string {
   return text.replace(/["'<>&]/g, char => map[char] || char)
 }
 
-/**
- * 특수문자를 HTML 엔티티로 이스케이프합니다.
- * (일반 텍스트 표시용)
- */
-export function escapeHtml(text: string): string {
-  const map: Record<string, string> = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;',
-    '/': '&#x2F;'
-  }
-  return text.replace(/[&<>"'/]/g, char => map[char] || char)
-}
+// 미사용 함수 - 주석처리
+// /**
+//  * 특수문자를 HTML 엔티티로 이스케이프합니다.
+//  * (일반 텍스트 표시용)
+//  */
+// export function escapeHtml(text: string): string {
+//   const map: Record<string, string> = {
+//     '&': '&amp;',
+//     '<': '&lt;',
+//     '>': '&gt;',
+//     '"': '&quot;',
+//     "'": '&#39;',
+//     '/': '&#x2F;'
+//   }
+//   return text.replace(/[&<>"'/]/g, char => map[char] || char)
+// }
 
 /**
  * URL을 검증하고 안전한 URL만 허용합니다.
