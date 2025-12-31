@@ -1,15 +1,12 @@
-// middleware.ts
-
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 import { ROUTES } from './lib/constants';
 
-export function middleware(request: NextRequest) {
+export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // 세션 쿠키 확인
   const sessionCookie = request.cookies.get('connect.sid');
-  const hasSession = !!sessionCookie;
 
   // 인증 관련 페이지 여부
   const isAuthPage = pathname.startsWith('/auth');
@@ -27,21 +24,52 @@ export function middleware(request: NextRequest) {
     isProtectedRoute = true;
   }
 
-  // 보호된 라우트인데 세션 없음 → 로그인 페이지로 리다이렉트
-  if (isProtectedRoute && !hasSession) {
-    console.log(`🚫 Unauthorized access attempt to: ${pathname} - Redirecting to login`);
-    const loginUrl = new URL(ROUTES.LOGIN, request.url);
-    loginUrl.searchParams.set('returnUrl', pathname);
-    return NextResponse.redirect(loginUrl);
-  }
+  // 보호된 라우트인 경우 세션 검증
+  if (isProtectedRoute) {
+    console.log(`🔍 Protected route accessed: ${pathname}`);
+    console.log(`🔍 Session cookie exists: ${!!sessionCookie}`);
+    console.log(`🔍 Cookie value: ${sessionCookie?.value?.substring(0, 20)}...`);
+    // 쿠키가 없으면 바로 리다이렉트
+    if (!sessionCookie) {
+      console.log(`🚫 No session cookie for: ${pathname} - Redirecting to login`);
+      const loginUrl = new URL(ROUTES.LOGIN, request.url);
+      loginUrl.searchParams.set('returnUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
 
-  // 세션이 있는 경우 접근 허용
-  if (isProtectedRoute && hasSession) {
-    console.log(`✅ Authorized access to protected route: ${pathname}`);
-  }
+    // 쿠키가 있으면 백엔드에서 세션 유효성 검증
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+      const response = await fetch(`${apiUrl}/auth/session/validate`, {
+        method: 'GET',
+        headers: {
+          'Cookie': `connect.sid=${sessionCookie.value}`,
+        },
+        credentials: 'include',
+      });
 
-  // 회원가입 페이지는 세션 있어도 접근 가능 (로그인 페이지도 접근 허용)
-  // 사용자가 다른 계정으로 로그인하거나 재로그인할 수 있도록 허용
+      // 세션이 유효하지 않으면 리다이렉트
+      if (!response.ok) {
+        console.log(`🚫 Invalid/expired session for: ${pathname} - Redirecting to login`);
+        const loginUrl = new URL(ROUTES.LOGIN, request.url);
+        loginUrl.searchParams.set('returnUrl', pathname);
+
+        // 응답에서 쿠키 삭제
+        const redirectResponse = NextResponse.redirect(loginUrl);
+        redirectResponse.cookies.delete('connect.sid');
+        return redirectResponse;
+      }
+
+      const sessionData = await response.json();
+      console.log(`✅ Valid session for ${pathname} - User: ${sessionData.userId}, Remaining: ${sessionData.remainingTime}ms`);
+    } catch (error) {
+      console.error('❌ Session validation error:', error);
+      // 네트워크 에러 등의 경우 로그인으로 리다이렉트
+      const loginUrl = new URL(ROUTES.LOGIN, request.url);
+      loginUrl.searchParams.set('returnUrl', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
 
   return NextResponse.next();
 }

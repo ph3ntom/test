@@ -33,7 +33,7 @@ export const ROUTES = {
   // 보호된 라우트 (인증 필요)
   // 질문 작성(/ask-question), 질문 수정(/questions/*/edit), 포인트샵
   // 질문 목록(/questions), 질문 상세(/questions/[id])는 공개
-  PROTECTED: ['/ask-question', '/pointshop'],
+  PROTECTED: ['/ask-question'],
 
   // 로그인 페이지
   LOGIN: '/auth/login',
